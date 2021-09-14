@@ -30,6 +30,7 @@
 #include <handle_system_kvm_create_vm.h>
 #include <handle_system_kvm_destroy_vm.h>
 #include <handle_system_kvm_get_vcpu_mmap_size.h>
+#include <handle_vcpu_kvm_set_regs.h>
 #include <handle_vm_kvm_create_vcpu.h>
 #include <handle_vm_kvm_destroy_vcpu.h>
 #include <linux/anon_inodes.h>
@@ -962,10 +963,19 @@ dispatch_vcpu_kvm_set_one_reg(struct kvm_one_reg *const ioctl_args)
 }
 
 static long
-dispatch_vcpu_kvm_set_regs(struct kvm_regs *const ioctl_args)
+dispatch_vcpu_kvm_set_regs(
+    struct shim_vcpu_t const *const pmut_vcpu,
+    struct kvm_regs *const pmut_ioctl_args)
 {
-    (void)ioctl_args;
-    return -EINVAL;
+    struct kvm_regs mut_args;
+
+    if (platform_copy_from_user(&mut_args, pmut_ioctl_args, sizeof(kvm_regs))) {
+        bferror("platform_copy_from_user failed") return -EINVAL;
+    }
+    if (handle_vcpu_kvm_set_regs(pmut_vcpu, &mut_args)) {
+        bferror("handle_vcpu_kvm_set_regs failed") return -EINVAL;
+    }
+    return (long)1;
 }
 
 static long
@@ -1089,7 +1099,8 @@ dev_unlocked_ioctl_vcpu(
         }
 
         case KVM_GET_SREGS: {
-            return dispatch_vcpu_kvm_get_sregs((struct kvm_sregs *)ioctl_args);
+            return dispatch_vcpu_kvm_get_sregs(
+                pmut_mut_vcpu, (struct kvm_sregs *)ioctl_args);
         }
 
         case KVM_GET_SUPPORTED_HV_CPUID: {
