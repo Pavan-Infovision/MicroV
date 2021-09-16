@@ -281,7 +281,7 @@ handle_vcpu_kvm_get_sregs(
     pmut_args->ss.padding = (uint8_t)pmut_reg_rdl->entries[SS_PADDING_IDX].val;
     pmut_args->tr.selector = (uint16_t)pmut_reg_rdl->entries[TR_SELECTOR_IDX].val;
     pmut_args->tr.type = (uint8_t)pmut_reg_rdl->entries[TR_TYPE_IDX].val;
-    pmut_args->tr.limit = (uint16_t)pmut_reg_rdl->entries[TR_LIMIT_IDX].val;
+    pmut_args->tr.limit = (uint32_t)pmut_reg_rdl->entries[TR_LIMIT_IDX].val;
     pmut_args->tr.base = pmut_reg_rdl->entries[TR_BASE_IDX].val;
     pmut_args->tr.present = (uint8_t)pmut_reg_rdl->entries[TR_PRESENT_IDX].val;
     pmut_args->tr.dpl = (uint8_t)pmut_reg_rdl->entries[TR_DPL_IDX].val;
