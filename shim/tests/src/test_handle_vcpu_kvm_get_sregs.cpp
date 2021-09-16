@@ -26,7 +26,6 @@
 
 #include <helpers.hpp>
 #include <kvm_sregs.h>
-#include <types.h>
 
 #include <bsl/convert.hpp>
 #include <bsl/safe_integral.hpp>

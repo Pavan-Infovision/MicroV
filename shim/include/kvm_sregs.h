@@ -59,10 +59,12 @@ extern "C"
         /** @brief stores that value of the tr segment register */
         struct kvm_segment tr;
         /** @brief stores that value of the ldt segment register */
+        // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         struct kvm_segment ldt;
         /** @brief stores that value of the gdt dtable register */
         struct kvm_dtable gdt;
         /** @brief stores that value of the gdt dtable register */
+        // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         struct kvm_dtable idt;
         /** @brief stores that value of the cr0 register */
         uint64_t cr0;
