@@ -335,8 +335,10 @@ enum mv_reg_t
         /** @brief defines the tr_padding register */
         mv_reg_t_tr_padding = 140,
         /** @brief defines the ldt_base register */
+        // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         mv_reg_t_ldt_base = 141,
         /** @brief defines the ldt_limit register */
+        // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         mv_reg_t_ldt_limit = 142,
         /** @brief defines the ldt_selector register */
         mv_reg_t_ldt_selector = 143,
@@ -371,8 +373,10 @@ enum mv_reg_t
         /** @brief defines the gdt_padding2 register */
         mv_reg_t_gdt_padding2 = 157,
         /** @brief defines the idt_base register */
+        // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         mv_reg_t_idt_base = 158,
         /** @brief defines the idt_limit register */
+        // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
         mv_reg_t_idt_limit = 159,
         /** @brief defines the idt_padding0 register */
         mv_reg_t_idt_padding0 = 160,
