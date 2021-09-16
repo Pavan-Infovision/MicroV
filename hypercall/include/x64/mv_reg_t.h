@@ -194,8 +194,198 @@ enum mv_reg_t
         mv_reg_t_cr8 = 69,
         /** @brief defines the xcr0 register (Intel Only) */
         mv_reg_t_xcr0 = 70,
+        /** @brief defines the es_type register */
+        mv_reg_t_es_type = 71,
+        /** @brief defines the es_present register */
+        mv_reg_t_es_present = 72,
+        /** @brief defines the es_dpl register */
+        mv_reg_t_es_dpl = 73,
+        /** @brief defines the es_db register */
+        mv_reg_t_es_db = 74,
+        /** @brief defines the es_s register */
+        mv_reg_t_es_s = 75,
+        /** @brief defines the es_l register */
+        mv_reg_t_es_l = 76,
+        /** @brief defines the es_g register */
+        mv_reg_t_es_g = 77,
+        /** @brief defines the es_avl register */
+        mv_reg_t_es_avl = 78,
+        /** @brief defines the es_unusable register */
+        mv_reg_t_es_unusable = 79,
+        /** @brief defines the es_padding register */
+        mv_reg_t_es_padding = 80,
+        /** @brief defines the cs_type register */
+        mv_reg_t_cs_type = 81,
+        /** @brief defines the cs_present register */
+        mv_reg_t_cs_present = 82,
+        /** @brief defines the cs_dpl register */
+        mv_reg_t_cs_dpl = 83,
+        /** @brief defines the cs_db register */
+        mv_reg_t_cs_db = 84,
+        /** @brief defines the cs_s register */
+        mv_reg_t_cs_s = 85,
+        /** @brief defines the cs_l register */
+        mv_reg_t_cs_l = 86,
+        /** @brief defines the cs_g register */
+        mv_reg_t_cs_g = 87,
+        /** @brief defines the cs_avl register */
+        mv_reg_t_cs_avl = 88,
+        /** @brief defines the cs_unusable register */
+        mv_reg_t_cs_unusable = 89,
+        /** @brief defines the cs_padding register */
+        mv_reg_t_cs_padding = 90,
+        /** @brief defines the ds_type register */
+        mv_reg_t_ds_type = 91,
+        /** @brief defines the ds_present register */
+        mv_reg_t_ds_present = 92,
+        /** @brief defines the ds_dpl register */
+        mv_reg_t_ds_dpl = 93,
+        /** @brief defines the ds_db register */
+        mv_reg_t_ds_db = 94,
+        /** @brief defines the ds_s register */
+        mv_reg_t_ds_s = 95,
+        /** @brief defines the ds_l register */
+        mv_reg_t_ds_l = 96,
+        /** @brief defines the ds_g register */
+        mv_reg_t_ds_g = 97,
+        /** @brief defines the ds_avl register */
+        mv_reg_t_ds_avl = 98,
+        /** @brief defines the ds_unusable register */
+        mv_reg_t_ds_unusable = 99,
+        /** @brief defines the ds_padding register */
+        mv_reg_t_ds_padding = 100,
+        /** @brief defines the fs_type register */
+        mv_reg_t_fs_type = 101,
+        /** @brief defines the fs_present register */
+        mv_reg_t_fs_present = 102,
+        /** @brief defines the fs_dpl register */
+        mv_reg_t_fs_dpl = 103,
+        /** @brief defines the fs_db register */
+        mv_reg_t_fs_db = 104,
+        /** @brief defines the fs_s register */
+        mv_reg_t_fs_s = 105,
+        /** @brief defines the fs_l register */
+        mv_reg_t_fs_l = 106,
+        /** @brief defines the fs_g register */
+        mv_reg_t_fs_g = 107,
+        /** @brief defines the fs_avl register */
+        mv_reg_t_fs_avl = 108,
+        /** @brief defines the fs_unusable register */
+        mv_reg_t_fs_unusable = 109,
+        /** @brief defines the fs_padding register */
+        mv_reg_t_fs_padding = 110,
+        /** @brief defines the gs_type register */
+        mv_reg_t_gs_type = 111,
+        /** @brief defines the gs_present register */
+        mv_reg_t_gs_present = 112,
+        /** @brief defines the gs_dpl register */
+        mv_reg_t_gs_dpl = 113,
+        /** @brief defines the gs_db register */
+        mv_reg_t_gs_db = 114,
+        /** @brief defines the gs_s register */
+        mv_reg_t_gs_s = 115,
+        /** @brief defines the gs_l register */
+        mv_reg_t_gs_l = 116,
+        /** @brief defines the gs_g register */
+        mv_reg_t_gs_g = 117,
+        /** @brief defines the gs_avl register */
+        mv_reg_t_gs_avl = 118,
+        /** @brief defines the gs_unusable register */
+        mv_reg_t_gs_unusable = 119,
+        /** @brief defines the gs_padding register */
+        mv_reg_t_gs_padding = 120,
+        /** @brief defines the ss_type register */
+        mv_reg_t_ss_type = 121,
+        /** @brief defines the ss_present register */
+        mv_reg_t_ss_present = 122,
+        /** @brief defines the ss_dpl register */
+        mv_reg_t_ss_dpl = 123,
+        /** @brief defines the ss_db register */
+        mv_reg_t_ss_db = 124,
+        /** @brief defines the ss_s register */
+        mv_reg_t_ss_s = 125,
+        /** @brief defines the ss_l register */
+        mv_reg_t_ss_l = 126,
+        /** @brief defines the ss_g register */
+        mv_reg_t_ss_g = 127,
+        /** @brief defines the ss_avl register */
+        mv_reg_t_ss_avl = 128,
+        /** @brief defines the ss_unusable register */
+        mv_reg_t_ss_unusable = 129,
+        /** @brief defines the ss_padding register */
+        mv_reg_t_ss_padding = 130,
+        /** @brief defines the tr_type register */
+        mv_reg_t_tr_type = 131,
+        /** @brief defines the tr_present register */
+        mv_reg_t_tr_present = 132,
+        /** @brief defines the tr_dpl register */
+        mv_reg_t_tr_dpl = 133,
+        /** @brief defines the tr_db register */
+        mv_reg_t_tr_db = 134,
+        /** @brief defines the tr_s register */
+        mv_reg_t_tr_s = 135,
+        /** @brief defines the tr_l register */
+        mv_reg_t_tr_l = 136,
+        /** @brief defines the tr_g register */
+        mv_reg_t_tr_g = 137,
+        /** @brief defines the tr_avl register */
+        mv_reg_t_tr_avl = 138,
+        /** @brief defines the tr_unusable register */
+        mv_reg_t_tr_unusable = 139,
+        /** @brief defines the tr_padding register */
+        mv_reg_t_tr_padding = 140,
+        /** @brief defines the ldt_base register */
+        mv_reg_t_ldt_base = 141,
+        /** @brief defines the ldt_limit register */
+        mv_reg_t_ldt_limit = 142,
+        /** @brief defines the ldt_selector register */
+        mv_reg_t_ldt_selector = 143,
+        /** @brief defines the ldt_type register */
+        mv_reg_t_ldt_type = 144,
+        /** @brief defines the ldt_present register */
+        mv_reg_t_ldt_present = 145,
+        /** @brief defines the ldt_dpl register */
+        mv_reg_t_ldt_dpl = 146,
+        /** @brief defines the ldt_db register */
+        mv_reg_t_ldt_db = 147,
+        /** @brief defines the ldt_s register */
+        mv_reg_t_ldt_s = 148,
+        /** @brief defines the ldt_l register */
+        mv_reg_t_ldt_l = 149,
+        /** @brief defines the ldt_g register */
+        mv_reg_t_ldt_g = 150,
+        /** @brief defines the ldt_avl register */
+        mv_reg_t_ldt_avl = 150,
+        /** @brief defines the ldt_unusable register */
+        mv_reg_t_ldt_unusable = 151,
+        /** @brief defines the ldt_padding register */
+        mv_reg_t_ldt_padding = 152,
+        /** @brief defines the gdt_base register */
+        mv_reg_t_gdt_base = 153,
+        /** @brief defines the gdt_limit register */
+        mv_reg_t_gdt_limit = 154,
+        /** @brief defines the gdt_padding0 register */
+        mv_reg_t_gdt_padding0 = 155,
+        /** @brief defines the gdt_padding1 register */
+        mv_reg_t_gdt_padding1 = 156,
+        /** @brief defines the gdt_padding2 register */
+        mv_reg_t_gdt_padding2 = 157,
+        /** @brief defines the idt_base register */
+        mv_reg_t_idt_base = 158,
+        /** @brief defines the idt_limit register */
+        mv_reg_t_idt_limit = 159,
+        /** @brief defines the idt_padding0 register */
+        mv_reg_t_idt_padding0 = 160,
+        /** @brief defines the idt_padding1 register */
+        mv_reg_t_idt_padding1 = 161,
+        /** @brief defines the idt_padding2 register */
+        mv_reg_t_idt_padding2 = 162,
+        /** @brief defines the mv_msr_t_efer register */
+        mv_msr_t_efer = 163,
+        /** @brief defines the mv_msr_t_apic_base register */
+        mv_msr_t_apic_base = 164,
         /** @brief defines and invalid mv_reg_t */
-        mv_reg_t_invalid = 71,
+        mv_reg_t_invalid = 165,
     };
 
 #ifdef __cplusplus
