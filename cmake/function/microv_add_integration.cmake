@@ -19,14 +19,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-add_custom_target(run_all_integration_tests)
-
 # Add's An Integration Test Target
 #
 macro(microv_add_integration NAME HEADERS)
     add_executable(integration_${NAME})
 
     target_include_directories(integration_${NAME} PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}/../include/
         ${CMAKE_CURRENT_LIST_DIR}/support
     )
 
@@ -48,11 +47,20 @@ macro(microv_add_integration NAME HEADERS)
         ${CMAKE_CURRENT_LIST_DIR}/${NAME}.cpp
     )
 
+    target_compile_definitions(integration_${NAME} PRIVATE
+        MICROV_MAX_VCPUS=${MICROV_MAX_VCPUS}_umx
+        MICROV_MAX_PP_MAPS=${MICROV_MAX_PP_MAPS}_umx
+    )
+
+    target_compile_options(integration_${NAME} PRIVATE -Wframe-larger-than=4294967295)
+
     set_property(SOURCE ${NAME} APPEND PROPERTY OBJECT_DEPENDS ${${HEADERS}})
 
     target_link_libraries(integration_${NAME} PRIVATE
         bsl
         hypercall
+        lib
+        shim
     )
 
     if(CMAKE_BUILD_TYPE STREQUAL RELEASE OR CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)

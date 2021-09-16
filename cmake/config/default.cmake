@@ -26,9 +26,17 @@ option(MICROV_BUILD_SHIM "Turns on/off building the shim" ON)
 option(MICROV_BUILD_VMM "Turns on/off building the vmm" ON)
 
 bf_add_config(
+    CONFIG_NAME MICROV_MAX_VCPUS
+    CONFIG_TYPE STRING
+    DEFAULT_VAL "${HYPERVISOR_MAX_PPS}"
+    DESCRIPTION "Defines MicroV's max number of KVM VCPUs per VM that are supported"
+    SKIP_VALIDATION
+)
+
+bf_add_config(
     CONFIG_NAME MICROV_MAX_PP_MAPS
     CONFIG_TYPE STRING
-    DEFAULT_VAL "10"
+    DEFAULT_VAL "150"
     DESCRIPTION "Defines MicroV's max number of maps each PP can have open at any given time"
     SKIP_VALIDATION
 )

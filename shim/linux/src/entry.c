@@ -27,17 +27,28 @@
  */
 
 #include <debug.h>
+#include <handle_system_kvm_create_vm.h>
+#include <handle_system_kvm_destroy_vm.h>
+#include <handle_system_kvm_get_vcpu_mmap_size.h>
+#include <handle_vcpu_kvm_get_regs.h>
+#include <handle_vcpu_kvm_get_sregs.h>
+#include <handle_vcpu_kvm_set_regs.h>
+#include <handle_vm_kvm_create_vcpu.h>
+#include <handle_vm_kvm_destroy_vcpu.h>
+#include <linux/anon_inodes.h>
 #include <linux/kernel.h>
 #include <linux/miscdevice.h>
 #include <linux/module.h>
 #include <linux/notifier.h>
 #include <linux/reboot.h>
 #include <linux/suspend.h>
+#include <mv_constants.h>
 #include <platform.h>
 #include <serial_init.h>
 #include <shim_fini.h>
 #include <shim_init.h>
 #include <shim_platform_interface.h>
+#include <shim_vm_t.h>
 #include <types.h>
 
 static int
@@ -52,6 +63,73 @@ dev_release(struct inode *inode, struct file *file)
     return 0;
 }
 
+static int
+vm_release_impl(struct shim_vm_t *const pmut_vm)
+{
+    uint64_t mut_i;
+
+    platform_expects(NULL != pmut_vm);
+    pmut_vm->fd = 0;
+
+    for (mut_i = ((uint64_t)0); mut_i < MICROV_MAX_VCPUS; ++mut_i) {
+        if (0 != (int32_t)pmut_vm->vcpus[mut_i].fd) {
+            return 0;
+        }
+    }
+
+    handle_system_kvm_destroy_vm(pmut_vm);
+    vfree(pmut_vm);
+
+    return 0;
+}
+
+static int
+vm_release(struct inode *inode, struct file *file)
+{
+    (void)inode;
+
+    platform_expects(NULL != file);
+    return vm_release_impl((struct shim_vm_t *)file->private_data);
+}
+
+static int
+vcpu_release_impl(struct shim_vcpu_t *const pmut_vcpu)
+{
+    platform_expects(NULL != pmut_vcpu);
+    pmut_vcpu->fd = 0;
+
+    handle_vm_kvm_destroy_vcpu(pmut_vcpu);
+
+    platform_expects(NULL != pmut_vcpu->vm);
+    if (0 == (int32_t)pmut_vcpu->vm->fd) {
+        vm_release_impl(pmut_vcpu->vm);
+    }
+
+    return 0;
+}
+
+static int
+vcpu_release(struct inode *inode, struct file *file)
+{
+    (void)inode;
+
+    platform_expects(NULL != file);
+    return vcpu_release_impl((struct shim_vcpu_t *)file->private_data);
+}
+
+static int
+device_release(struct inode *inode, struct file *file)
+{
+    (void)inode;
+    (void)file;
+
+    return -EINVAL;
+}
+
+static struct file_operations fops_vm;
+static struct file_operations fops_vcpu;
+static struct file_operations fops_device;
+
 /* -------------------------------------------------------------------------- */
 /* System IOCTLs                                                              */
 /* -------------------------------------------------------------------------- */
@@ -65,6 +143,40 @@ dispatch_system_kvm_check_extension(void)
 static long
 dispatch_system_kvm_create_vm(void)
 {
+    char name[22];
+
+    struct shim_vm_t *const pmut_vm =
+        (struct shim_vm_t *)vmalloc(sizeof(struct shim_vm_t));
+
+    if (NULL == pmut_vm) {
+        bferror("vmalloc failed");
+        return -EINVAL;
+    }
+
+    platform_mutex_init(&pmut_vm->mutex);
+
+    if (handle_system_kvm_create_vm(pmut_vm)) {
+        bferror("handle_system_kvm_create_vm failed");
+        goto vmalloc_failed;
+    }
+
+    snprintf(name, sizeof(name), "kvm-vm:%d", pmut_vm->id);
+
+    pmut_vm->fd =
+        (uint64_t)anon_inode_getfd(name, &fops_vm, pmut_vm, O_RDWR | O_CLOEXEC);
+    if ((int32_t)pmut_vm->fd < 0) {
+        bferror("anon_inode_getfd failed");
+        goto handle_system_kvm_create_vm_failed;
+    }
+
+    return (long)pmut_vm->fd;
+
+handle_system_kvm_create_vm_failed:
+    handle_system_kvm_destroy_vm(pmut_vm);
+
+vmalloc_failed:
+    vfree(pmut_vm);
+
     return -EINVAL;
 }
 
@@ -113,7 +225,9 @@ dispatch_system_kvm_get_supported_cpuid(struct kvm_cpuid2 *const ioctl_args)
 static long
 dispatch_system_kvm_get_vcpu_mmap_size(void)
 {
-    return -EINVAL;
+    uint32_t size;
+    handle_system_kvm_get_vcpu_mmap_size(&size);
+    return (long)size;
 }
 
 static long
@@ -241,6 +355,8 @@ static long
 dispatch_vm_kvm_create_device(struct kvm_create_device *const ioctl_args)
 {
     (void)ioctl_args;
+
+    (void)fops_device;
     return -EINVAL;
 }
 
@@ -258,8 +374,32 @@ dispatch_vm_kvm_create_pit2(struct kvm_pit_config *const ioctl_args)
 }
 
 static long
-dispatch_vm_kvm_create_vcpu(void)
+dispatch_vm_kvm_create_vcpu(struct shim_vm_t *const pmut_vm)
 {
+    char name[24];
+    struct shim_vcpu_t *pmut_mut_vcpu;
+
+    if (handle_vm_kvm_create_vcpu(pmut_vm, &pmut_mut_vcpu)) {
+        bferror("handle_vm_kvm_create_vcpu failed");
+        return -EINVAL;
+    }
+
+    platform_expects(NULL != pmut_mut_vcpu);
+    snprintf(name, sizeof(name), "kvm-vcpu:%d", pmut_mut_vcpu->id);
+
+    pmut_mut_vcpu->fd = (uint64_t)anon_inode_getfd(
+        name, &fops_vcpu, pmut_mut_vcpu, O_RDWR | O_CLOEXEC);
+    if ((int32_t)pmut_mut_vcpu->fd < 0) {
+        bferror("anon_inode_getfd failed");
+        goto handle_vm_kvm_create_vcpu_failed;
+    }
+
+    pmut_mut_vcpu->vm = pmut_vm;
+    return (long)pmut_mut_vcpu->fd;
+
+handle_vm_kvm_create_vcpu_failed:
+    handle_vm_kvm_destroy_vcpu(pmut_mut_vcpu);
+
     return -EINVAL;
 }
 
@@ -457,6 +597,11 @@ static long
 dev_unlocked_ioctl_vm(
     struct file *file, unsigned int cmd, unsigned long ioctl_args)
 {
+    struct shim_vm_t *pmut_mut_vm;
+    platform_expects(NULL != file);
+
+    pmut_mut_vm = (struct shim_vm_t *)file->private_data;
+
     switch (cmd) {
         case KVM_CHECK_EXTENSION: {
             return dispatch_vm_kvm_check_extension();
@@ -482,7 +627,7 @@ dev_unlocked_ioctl_vm(
         }
 
         case KVM_CREATE_VCPU: {
-            return dispatch_vm_kvm_create_vcpu();
+            return dispatch_vm_kvm_create_vcpu(pmut_mut_vm);
         }
 
         case KVM_GET_CLOCK: {
@@ -684,17 +829,35 @@ dispatch_vcpu_kvm_get_one_reg(struct kvm_one_reg *const ioctl_args)
 }
 
 static long
-dispatch_vcpu_kvm_get_regs(struct kvm_regs *const ioctl_args)
+dispatch_vcpu_kvm_get_regs(
+    struct shim_vcpu_t const *const vcpu, struct kvm_regs *const user_args)
 {
-    (void)ioctl_args;
-    return -EINVAL;
+    struct kvm_regs mut_args;
+
+    if (handle_vcpu_kvm_get_regs(vcpu, &mut_args)) {
+        bferror("handle_vcpu_kvm_get_regs failed");
+        return -EINVAL;
+    }
+
+    platform_copy_to_user(user_args, &mut_args, sizeof(struct kvm_regs));
+
+    return (long)1;
 }
 
 static long
-dispatch_vcpu_kvm_get_sregs(struct kvm_sregs *const ioctl_args)
+dispatch_vcpu_kvm_get_sregs(
+    struct shim_vcpu_t const *const vcpu, struct kvm_sregs *const user_args)
 {
-    (void)ioctl_args;
-    return -EINVAL;
+    struct kvm_sregs mut_args;
+
+    if (handle_vcpu_kvm_get_sregs(vcpu, &mut_args)) {
+        bferror("handle_vcpu_kvm_get_sregs failed");
+        return -EINVAL;
+    }
+
+    platform_copy_to_user(user_args, &mut_args, sizeof(struct kvm_sregs));
+
+    return (long)1;
 }
 
 static long
@@ -820,10 +983,18 @@ dispatch_vcpu_kvm_set_one_reg(struct kvm_one_reg *const ioctl_args)
 }
 
 static long
-dispatch_vcpu_kvm_set_regs(struct kvm_regs *const ioctl_args)
+dispatch_vcpu_kvm_set_regs(
+    struct shim_vcpu_t const *const vcpu, struct kvm_regs *const user_args)
 {
-    (void)ioctl_args;
-    return -EINVAL;
+    struct kvm_regs mut_args;
+
+    platform_copy_from_user(&mut_args, user_args, sizeof(kvm_regs));
+
+    if (handle_vcpu_kvm_set_regs(vcpu, &mut_args)) {
+        bferror("handle_vcpu_kvm_set_regs failed") return -EINVAL;
+    }
+
+    return (long)1;
 }
 
 static long
@@ -898,6 +1069,11 @@ static long
 dev_unlocked_ioctl_vcpu(
     struct file *file, unsigned int cmd, unsigned long ioctl_args)
 {
+    struct shim_vcpu_t *pmut_mut_vcpu;
+    platform_expects(NULL != file);
+
+    pmut_mut_vcpu = (struct shim_vcpu_t *)file->private_data;
+
     switch (cmd) {
         case KVM_ENABLE_CAP: {
             return dispatch_vcpu_kvm_enable_cap(
@@ -938,11 +1114,13 @@ dev_unlocked_ioctl_vcpu(
         }
 
         case KVM_GET_REGS: {
-            return dispatch_vcpu_kvm_get_regs((struct kvm_regs *)ioctl_args);
+            return dispatch_vcpu_kvm_get_regs(
+                pmut_mut_vcpu, (struct kvm_regs *)ioctl_args);
         }
 
         case KVM_GET_SREGS: {
-            return dispatch_vcpu_kvm_get_sregs((struct kvm_sregs *)ioctl_args);
+            return dispatch_vcpu_kvm_get_sregs(
+                pmut_mut_vcpu, (struct kvm_sregs *)ioctl_args);
         }
 
         case KVM_GET_SUPPORTED_HV_CPUID: {
@@ -1027,7 +1205,8 @@ dev_unlocked_ioctl_vcpu(
         }
 
         case KVM_SET_REGS: {
-            return dispatch_vcpu_kvm_set_regs((struct kvm_regs *)ioctl_args);
+            return dispatch_vcpu_kvm_set_regs(
+                pmut_mut_vcpu, (struct kvm_regs *)ioctl_args);
         }
 
         case KVM_SET_SIGNAL_MASK: {
@@ -1147,6 +1326,15 @@ static struct miscdevice shim_dev = {
     .name = SHIM_NAME,
     .fops = &fops,
     .mode = 0666};
+
+static struct file_operations fops_vm = {
+    .release = vm_release, .unlocked_ioctl = dev_unlocked_ioctl_vm};
+
+static struct file_operations fops_vcpu = {
+    .release = vcpu_release, .unlocked_ioctl = dev_unlocked_ioctl_vcpu};
+
+static struct file_operations fops_device = {
+    .release = device_release, .unlocked_ioctl = dev_unlocked_ioctl_device};
 
 /* -------------------------------------------------------------------------- */
 /* Entry / Exit                                                               */

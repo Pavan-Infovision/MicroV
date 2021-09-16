@@ -25,13 +25,31 @@
 #ifndef INTEGRATION_UTILS_HPP
 #define INTEGRATION_UTILS_HPP
 
-#include <bsl/cstdlib.hpp>
+#include <cstdlib>
+
+#include <bsl/convert.hpp>
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
-#include <bsl/source_location.hpp>
 #include <bsl/touch.hpp>
 #include <bsl/unlikely.hpp>
+
+namespace hypercall
+{
+    /// <!-- description -->
+    ///   @brief Returns bsl::to_umx(reinterpret_cast<bsl::uintmx>(pmut_ptr));
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param pmut_ptr the pointer to convert to a bsl::safe_umx
+    ///   @return Returns bsl::to_umx(reinterpret_cast<bsl::uintmx>(pmut_ptr));
+    ///
+    [[nodiscard]] constexpr auto
+    to_umx(void *const pmut_ptr) noexcept -> bsl::safe_umx
+    {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-type-reinterpret-cast)
+        return bsl::to_umx(reinterpret_cast<bsl::uintmx>(pmut_ptr));
+    }
+}
 
 namespace integration
 {

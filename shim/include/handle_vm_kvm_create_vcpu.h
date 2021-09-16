@@ -27,15 +27,29 @@
 #ifndef HANDLE_VM_KVM_CREATE_VCPU_H
 #define HANDLE_VM_KVM_CREATE_VCPU_H
 
+#include <shim_vcpu_t.h>
+#include <shim_vm_t.h>
 #include <types.h>
 
-/**
- * <!-- description -->
- *   @brief Handles the execution of kvm_create_vcpu.
- *
- * <!-- inputs/outputs -->
- *   @return SHIM_SUCCESS on success, SHIM_FAILURE on failure.
- */
-int64_t handle_vm_kvm_create_vcpu(void);
+#ifdef __cplusplus
+extern "C"
+{
+#endif
+
+    /**
+     * <!-- description -->
+     *   @brief Handles the execution of kvm_create_vcpu.
+     *
+     * <!-- inputs/outputs -->
+     *   @param pmut_vm the VM to add the VCPU to
+     *   @param pmut_vcpu returns the resulting VCPU
+     *   @return SHIM_SUCCESS on success, SHIM_FAILURE on failure.
+     */
+    NODISCARD int64_t handle_vm_kvm_create_vcpu(
+        struct shim_vm_t *const pmut_vm, struct shim_vcpu_t **const pmut_vcpu) NOEXCEPT;
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

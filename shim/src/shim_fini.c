@@ -24,10 +24,14 @@
  * SOFTWARE.
  */
 
+#include <constants.h>
 #include <debug.h>
-#include <g_hndl.h>
+#include <g_mut_hndl.h>
+#include <g_mut_shared_pages.h>
+#include <mv_constants.h>
 #include <mv_hypercall.h>
 #include <platform.h>
+#include <touch.h>
 #include <types.h>
 
 /**
@@ -40,14 +44,25 @@
  * <!-- inputs/outputs -->
  *   @return SHIM_SUCCESS on success, SHIM_FAILURE on failure.
  */
-int64_t
-shim_fini(void)
+NODISCARD int64_t
+shim_fini(void) NOEXCEPT
 {
-    if (MV_INVALID_HANDLE != g_hndl) {
-        if (mv_handle_op_close_handle(g_hndl)) {
+    uint64_t mut_i;
+
+    for (mut_i = ((uint64_t)0); mut_i < (uint64_t)platform_num_online_cpus(); ++mut_i) {
+        platform_free(g_mut_shared_pages[mut_i], HYPERVISOR_PAGE_SIZE);
+    }
+
+    if (MV_INVALID_HANDLE != g_mut_hndl) {
+        if (mv_handle_op_close_handle(g_mut_hndl)) {
             bferror("mv_handle_op_close_handle failed");
             return SHIM_FAILURE;
         }
+
+        touch();
+    }
+    else {
+        touch();
     }
 
     return SHIM_SUCCESS;

@@ -25,17 +25,35 @@
  */
 
 #include <debug.h>
+#include <g_mut_hndl.h>
+#include <mv_constants.h>
+#include <mv_hypercall.h>
+#include <platform.h>
+#include <shim_vm_t.h>
 #include <types.h>
 
 /**
  * <!-- description -->
- *   @brief Handles the execution of kvm_check_extension.
+ *   @brief Handles the execution of kvm_create_vm.
  *
  * <!-- inputs/outputs -->
+ *   @param pmut_vm returns the resulting VM
  *   @return SHIM_SUCCESS on success, SHIM_FAILURE on failure.
  */
-int64_t
-handle_system_kvm_create_vm(void)
+NODISCARD int64_t
+handle_system_kvm_create_vm(struct shim_vm_t *const pmut_vm) NOEXCEPT
 {
+    platform_expects(MV_INVALID_HANDLE != g_mut_hndl);
+    platform_expects(NULL != pmut_vm);
+
+    platform_memset(pmut_vm, ((uint8_t)0), sizeof(struct shim_vm_t));
+
+    pmut_vm->vmid = mv_vm_op_create_vm(g_mut_hndl);
+    if (MV_INVALID_ID == (int32_t)pmut_vm->vmid) {
+        bferror("mv_vm_op_create_vm failed");
+        return SHIM_FAILURE;
+    }
+
+    pmut_vm->id = pmut_vm->vmid;
     return SHIM_SUCCESS;
 }

@@ -25,11 +25,20 @@ project(microv C CXX ASM)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/init_build.cmake)
 
 if(NOT CMAKE_BUILD_TYPE STREQUAL CODECOV)
-    if(MICROV_BUILD_HYPERCALL)
-        add_subdirectory(hypercall)
+    add_subdirectory(hypercall)
+
+    if(MICROV_BUILD_SHIM)
+        add_subdirectory(shim)
     endif()
 
     if(BUILD_TESTS AND NOT MICROV_BUILD_TESTS_OVERRIDE)
+        include(shim/integration/CMakeLists.txt)
         include(vmm/integration/CMakeLists.txt)
+    endif()
+endif()
+
+if(NOT CMAKE_BUILD_TYPE STREQUAL RELEASE AND NOT CMAKE_BUILD_TYPE STREQUAL MINSIZEREL)
+    if(BUILD_TESTS AND NOT MICROV_BUILD_TESTS_OVERRIDE)
+        add_subdirectory(shim/tests)
     endif()
 endif()

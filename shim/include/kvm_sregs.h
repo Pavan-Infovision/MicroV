@@ -27,19 +27,65 @@
 #ifndef KVM_SREGS_H
 #define KVM_SREGS_H
 
+#include <kvm_dtable.h>
+#include <kvm_segment.h>
 #include <stdint.h>
 
-#pragma pack(push, 1)
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-/**
- * @struct kvm_sregs
- *
- * <!-- description -->
- *   @brief see /include/uapi/linux/kvm.h in Linux for more details.
- */
-struct kvm_sregs
-{};
+    /**
+     * @struct kvm_sregs
+     *
+     * <!-- description -->
+     *   @brief see /include/uapi/linux/kvm.h in Linux for more details.
+     */
+    struct kvm_sregs
+    {
+        /** @brief stores that value of the cs segment register */
+        struct kvm_segment cs;
+        /** @brief stores that value of the ds segment register */
+        struct kvm_segment ds;
+        /** @brief stores that value of the es segment register */
+        struct kvm_segment es;
+        /** @brief stores that value of the fs segment register */
+        struct kvm_segment fs;
+        /** @brief stores that value of the gs segment register */
+        struct kvm_segment gs;
+        /** @brief stores that value of the ss segment register */
+        struct kvm_segment ss;
+        /** @brief stores that value of the tr segment register */
+        struct kvm_segment tr;
+        /** @brief stores that value of the ldt segment register */
+        // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
+        struct kvm_segment ldt;
+        /** @brief stores that value of the gdt dtable register */
+        struct kvm_dtable gdt;
+        /** @brief stores that value of the gdt dtable register */
+        // NOLINTNEXTLINE(bsl-identifier-typographically-unambiguous)
+        struct kvm_dtable idt;
+        /** @brief stores that value of the cr0 register */
+        uint64_t cr0;
+        /** @brief stores that value of the cr2 register */
+        uint64_t cr2;
+        /** @brief stores that value of the cr3 register */
+        uint64_t cr3;
+        /** @brief stores that value of the cr4 register */
+        uint64_t cr4;
+        /** @brief stores that value of the cr8 register */
+        uint64_t cr8;
+        /** @brief stores that value of the efer register */
+        uint64_t efer;
+        /** @brief stores that value of the apic_base register */
+        uint64_t apic_base;
+        /** @brief stores that value of the interrupt bitmap */
+        uint64_t interrupt_bitmap[4];
+    };
 
-#pragma pack(pop)
+#ifdef __cplusplus
+}
+#endif
 
 #endif

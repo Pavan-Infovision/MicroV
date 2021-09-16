@@ -32,8 +32,9 @@
 namespace microv
 {
     /// @struct microv::pte_t
+    ///
     /// <!-- description -->
-    ///   @brief Defines the layout of a page table entry (PTE).
+    ///   @brief Defines the layout of a pt_t entry table entry.
     ///
     struct pte_t final
     {
@@ -51,12 +52,12 @@ namespace microv
         bsl::uint64 a : static_cast<bsl::uint64>(1);
         /// @brief defines the "dirty" field in the page (ignored)
         bsl::uint64 d : static_cast<bsl::uint64>(1);
-        /// @brief defines the "page size" field in the page (must be 0)
-        bsl::uint64 ps : static_cast<bsl::uint64>(1);
+        /// @brief defines the "pat" field in the page (must be 0)
+        bsl::uint64 pat : static_cast<bsl::uint64>(1);
         /// @brief defines the "global" field in the page (must be 0)
         bsl::uint64 g : static_cast<bsl::uint64>(1);
-        /// @brief defines our "auto_release" field in the page
-        bsl::uint64 auto_release : static_cast<bsl::uint64>(3);
+        /// @brief defines our "available to software" field in the page
+        bsl::uint64 available1 : static_cast<bsl::uint64>(3);
         /// @brief defines the "physical address" field in the page
         bsl::uint64 phys : static_cast<bsl::uint64>(40);
         /// @brief defines the "available to software" field in the page

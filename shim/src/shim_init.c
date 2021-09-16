@@ -24,10 +24,14 @@
  * SOFTWARE.
  */
 
+#include <constants.h>
 #include <debug.h>
-#include <g_hndl.h>
+#include <g_mut_hndl.h>
+#include <g_mut_shared_pages.h>
+#include <mv_constants.h>
 #include <mv_hypercall.h>
 #include <platform.h>
+#include <touch.h>
 #include <types.h>
 
 /**
@@ -40,20 +44,48 @@
  * <!-- inputs/outputs -->
  *   @return SHIM_SUCCESS on success, SHIM_FAILURE on failure.
  */
-int64_t
-shim_init(void)
+NODISCARD int64_t
+shim_init(void) NOEXCEPT
 {
-    uint32_t const version = mv_id_op_version();
-    if (mv_is_spec1_supported(version)) {
-        bferror_x32("unsupported version of MicroV", version);
+    uint64_t mut_i;
+    uint32_t mut_version;
+    uint64_t mut_num_pps;
+
+    mut_num_pps = (uint64_t)platform_num_online_cpus();
+    if (mut_num_pps > HYPERVISOR_MAX_PPS) {
+        bferror_d64("unsupported number of CPUs", mut_num_pps);
         return SHIM_FAILURE;
     }
 
-    g_hndl = mv_handle_op_open_handle(MV_SPEC_ID1_VAL);
-    if (MV_INVALID_HANDLE == g_hndl) {
+    mut_version = mv_id_op_version();
+    if (mv_is_spec1_supported(mut_version)) {
+        bferror_x32("unsupported version of MicroV. Is MicroV running?", mut_version);
+        return SHIM_FAILURE;
+    }
+
+    g_mut_hndl = mv_handle_op_open_handle(MV_SPEC_ID1_VAL);
+    if (MV_INVALID_HANDLE == g_mut_hndl) {
         bferror("mv_handle_op_open_handle failed");
         return SHIM_FAILURE;
     }
 
+    for (mut_i = ((uint64_t)0); mut_i < mut_num_pps; ++mut_i) {
+        g_mut_shared_pages[mut_i] = (void *)platform_alloc(HYPERVISOR_PAGE_SIZE);
+        if (((void *)0) == g_mut_shared_pages[mut_i]) {
+            bferror("platform_alloc failed");
+            goto platform_alloc_failed;
+        }
+
+        touch();
+    }
+
     return SHIM_SUCCESS;
+
+platform_alloc_failed:
+
+    for (mut_i = ((uint64_t)0); mut_i < mut_num_pps; ++mut_i) {
+        platform_free(g_mut_shared_pages[mut_i], HYPERVISOR_PAGE_SIZE);
+    }
+
+    return SHIM_FAILURE;
 }
