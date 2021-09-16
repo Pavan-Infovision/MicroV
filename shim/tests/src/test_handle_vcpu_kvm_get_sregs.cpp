@@ -70,6 +70,7 @@ namespace shim
                 kvm_sregs mut_args{};
                 bsl::ut_when{} = [&]() noexcept {
                     g_mut_mv_vs_op_reg_get_list = MV_INVALID_ID;
+		    g_mut_mv_vs_op_msr_get_list = {};
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
                             SHIM_FAILURE == handle_vcpu_kvm_get_sregs(&mut_vcpu, &mut_args));
@@ -83,6 +84,7 @@ namespace shim
                 shim_vcpu_t mut_vcpu{};
                 kvm_sregs mut_args{};
                 bsl::ut_when{} = [&]() noexcept {
+		    g_mut_mv_vs_op_reg_get_list = {};	
                     g_mut_mv_vs_op_msr_get_list = MV_INVALID_ID;
                     bsl::ut_then{} = [&]() noexcept {
                         bsl::ut_check(
