@@ -94,8 +94,8 @@ namespace shim
                 };
             };
         };
-
-        return bsl::ut_success();
+        
+        return fini_tests();
     }
 }
 
