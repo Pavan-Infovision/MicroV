@@ -26,8 +26,8 @@
 #define INTEGRATION_UTILS_HPP
 
 #include <cstdlib>
-#include <ifmap.hpp>
-#include <ioctl.hpp>
+#include <ifmap_t.hpp>
+#include <ioctl_t.hpp>
 #include <kvm_regs.hpp>
 #include <kvm_run.hpp>
 #include <kvm_segment.hpp>
@@ -35,6 +35,7 @@
 #include <kvm_userspace_memory_region.hpp>
 #include <shim_platform_interface.hpp>
 
+#include <sys/ioctl.h>
 #include <bsl/debug.hpp>
 #include <bsl/errc_type.hpp>
 #include <bsl/safe_integral.hpp>
@@ -124,16 +125,16 @@ namespace integration
     ///   @param filename the filename of the VM image to load
     ///
     constexpr void
-    initialize_16bit_vm(lib::ioctl &mut_vm, bsl::string_view const &filename) noexcept
+    initialize_16bit_vm(ioctl_t &mut_vm, bsl::string_view const &filename) noexcept
     {
-        lib::ifmap const vm_image{filename};
+        ifmap_t const vm_image{filename};
         integration::verify(!vm_image.empty());
 
-        shim::kvm_userspace_memory_region region{};
-        region.memory_size = vm_image.size().get();
-        region.userspace_addr = vm_image.data();
+        shim::kvm_userspace_memory_region mut_region{};
+        mut_region.memory_size = vm_image.size().get();
+        mut_region.userspace_addr = vm_image.data();
 
-        auto const ret{mut_vm.write(shim::KVM_SET_USER_MEMORY_REGION, &region)};
+        auto const ret{mut_vm.write(shim::KVM_SET_USER_MEMORY_REGION, &mut_region)};
         integration::verify(ret.is_zero());
     }
 
@@ -145,7 +146,7 @@ namespace integration
     ///   @return Returns the KVM_RUN struct associated with the VCPU
     ///
     [[maybe_unused]] constexpr auto
-    initialize_16bit_vcpu(lib::ioctl &mut_vcpu) noexcept -> shim::kvm_run *
+    initialize_16bit_vcpu(ioctl_t &mut_vcpu) noexcept -> shim::kvm_run *
     {
         shim::kvm_run *const pmut_run{static_cast<shim::kvm_run *>(mmap(
             nullptr,
@@ -169,6 +170,19 @@ namespace integration
         integration::verify(mut_vcpu.write(shim::KVM_SET_SREGS, &mut_sregs).is_zero());
 
         return pmut_run;
+    }
+    /// <!-- description -->
+    ///   @brief this function is a substitute for ioctl to be used in
+    ///     integration testing.
+    ///
+    /// <!-- inputs/outputs -->
+    ///   @param fd input as vcpufd or system fd
+    ///   @param request used for ioctl id
+    ///   @return Returns the failure with int32
+    [[nodiscard]] constexpr auto
+    platform_ioctl(bsl::int32 const fd, bsl::uint64 const request) noexcept -> bsl::int32
+    {
+        return ioctl(fd, request, nullptr);
     }
 }
 
