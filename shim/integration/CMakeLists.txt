@@ -46,4 +46,9 @@ microv_add_shim_integration(kvm_get_mp_state HEADERS)
 microv_add_shim_integration(kvm_set_mp_state HEADERS)
 microv_add_shim_integration(kvm_get_tsc_khz HEADERS)
 microv_add_shim_integration(kvm_get_msr_index_list HEADERS)
+<<<<<<< HEAD
 microv_add_shim_integration(kvm_get_supported_cpuid HEADERS)
+=======
+>>>>>>> 883ea3880... MSRS Get/Set API Changes
+microv_add_shim_integration(kvm_get_msrs HEADERS)
+microv_add_shim_integration(kvm_set_msrs HEADERS)
