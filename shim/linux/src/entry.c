@@ -32,6 +32,7 @@
 #include <handle_system_kvm_destroy_vm.h>
 #include <handle_system_kvm_get_api_version.h>
 #include <handle_system_kvm_get_msr_index_list.h>
+#include <handle_system_kvm_get_msrs.h>
 #include <handle_system_kvm_get_supported_cpuid.h>
 #include <handle_system_kvm_get_msrs.h>
 #include <handle_system_kvm_get_vcpu_mmap_size.h>

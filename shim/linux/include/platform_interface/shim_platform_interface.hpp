@@ -92,6 +92,17 @@
 #define _IOWR_LIST(type, nr, size, sub_size)                                                       \
     _IOC(_IOC_READ | _IOC_WRITE, (type), (nr), sizeof(size) - sizeof(sub_size))
 
+/**
+ * @brief Hack for defining ioctl commands that require structs
+ * with zero-length arrays. This is usually for ioctls that return
+ * a list.
+ *
+ * It is just like _IOWR, except it subtracts the size of a pointer
+ * from the size of the struct passed.
+ */
+#define _IOWR_LIST(type, nr, size, sub_size)                                                       \
+    _IOC(_IOC_READ | _IOC_WRITE, (type), (nr), sizeof(size) - sizeof(sub_size))
+
 namespace shim
 {
     /// @brief magic number for KVM IOCTLs
