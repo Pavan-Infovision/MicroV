@@ -79,7 +79,9 @@ main() noexcept -> bsl::exit_code
         auto const vcpufd{mut_vm.send(shim::KVM_CREATE_VCPU)};
         integration::ioctl_t mut_vcpu{bsl::to_i32(vcpufd)};
 
-        integration::verify(mut_vcpu.write(shim::KVM_SET_MSRS, &mut_msrs).is_zero());
+        //integration::verify(mut_vcpu.write(shim::KVM_SET_MSRS, &mut_msrs).is_zero());
+        auto const ret1{bsl::to_u32(mut_vcpu.write(shim::KVM_SET_MSRS, &mut_msrs))};
+        integration::verify(ret1 >= EXPECTED_NMSRS.get());
         mut_msrs = {};
         auto const ret{bsl::to_u32(mut_vcpu.read(shim::KVM_GET_MSRS, &mut_msrs))};
 
@@ -102,7 +104,9 @@ main() noexcept -> bsl::exit_code
 
         constexpr auto num_loops{0x1000_umx};
         for (bsl::safe_idx mut_i{}; mut_i < num_loops; ++mut_i) {
-            integration::verify(mut_vcpu.write(shim::KVM_SET_MSRS, &mut_msrs).is_zero());
+            //integration::verify(mut_vcpu.write(shim::KVM_SET_MSRS, &mut_msrs).is_zero());
+            auto const ret1{bsl::to_u32(mut_vcpu.write(shim::KVM_SET_MSRS, &mut_msrs))};
+            integration::verify(ret1 >= EXPECTED_NMSRS.get());
         }
     }
 

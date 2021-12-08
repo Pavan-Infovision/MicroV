@@ -38,11 +38,11 @@
 namespace
 {
     /// @brief defines the number of MSRS we expect
-    constexpr auto EXPECTED_NMSRS{0x01_u32};
+    constexpr auto EXPECTED_NMSRS{0x02_u32};
     /// @brief defines the PAD we expect
-    constexpr auto EXPECTED_PAD{0x00_u32};
+    constexpr auto EXPECTED_PAD{0x01_u32};
     /// @brief defines the size for entries in RDL
-    constexpr auto MYSIZE_ENTRIES{1_u64};
+    constexpr auto MYSIZE_ENTRIES{2_u64};
     /// @brief defines the register index we expect
     constexpr auto EXPECTED_INDEX{0x00_u32};
     /// @brief defines the register data we expect
@@ -79,7 +79,10 @@ main() noexcept -> bsl::exit_code
         auto const vcpufd{mut_vm.send(shim::KVM_CREATE_VCPU)};
         integration::ioctl_t mut_vcpu{bsl::to_i32(vcpufd)};
 
-        integration::verify(mut_vcpu.write(shim::KVM_SET_MSRS, &mut_msrs).is_zero());
+        auto const ret1{bsl::to_u32(mut_vcpu.write(shim::KVM_SET_MSRS, &mut_msrs))};
+        bsl::print() << " expected_nmsrs: " << EXPECTED_NMSRS.get() << bsl::endl;
+        bsl::print() << " ret1: " << ret1 << bsl::endl;
+        integration::verify(ret1 >= EXPECTED_NMSRS.get());
         mut_msrs = {};
         auto const ret{bsl::to_u32(mut_vcpu.read(shim::KVM_GET_MSRS, &mut_msrs))};
 
