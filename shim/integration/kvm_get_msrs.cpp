@@ -38,13 +38,13 @@
 namespace
 {
     /// @brief defines the number of MSRS we expect
-    constexpr auto EXPECTED_NMSRS{0x02_u32};
+    constexpr auto EXPECTED_NMSRS{0x01_u32};
     /// @brief defines the PAD we expect
     constexpr auto EXPECTED_PAD{0x01_u32};
     /// @brief defines the size for entries in RDL
-    constexpr auto MYSIZE_ENTRIES{2_u64};
+    constexpr auto MYSIZE_ENTRIES{1_u64};
     /// @brief defines the register index we expect
-    constexpr auto EXPECTED_INDEX{0x00_u32};
+    constexpr auto EXPECTED_INDEX{0x01_u32};
     /// @brief defines the register data we expect
     constexpr auto EXPECTED_DATA{0x42_u64};
 }
